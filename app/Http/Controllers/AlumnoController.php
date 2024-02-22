@@ -30,9 +30,22 @@ class AlumnoController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Alumno $alumno)
+    public function show(int $id)
     {
-        return new AlumnoResource($alumno);
+        $resource = Alumno::find($id);
+
+        if (!$resource) {
+            return response()->json([
+                'errors' => [
+                    [
+                        'status' => '404',
+                        'title' => 'Resource Not Found',
+                        'detail' => 'The requested resource does not exist or could not be found.'
+                    ]
+                ]
+            ], 404);
+        }
+        return new AlumnoResource($resource);
     }
 
     /**
