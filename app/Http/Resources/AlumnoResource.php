@@ -3,9 +3,9 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\ResourceCollection;
+use Illuminate\Http\Resources\Json\JsonResource;
 
-class AlumnoResource extends ResourceCollection
+class AlumnoResource extends JsonResource
 {
     /**
      * Transform the resource collection into an array.
@@ -27,4 +27,10 @@ class AlumnoResource extends ResourceCollection
                 'self' => url('api/alumnos/' . $this->id)
             ]];
     }
+    public function with(Request $request)
+    {
+        return ["jsonapi" =>
+            ["version" => "1.0"]];
+    }
+
 }
