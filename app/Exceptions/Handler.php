@@ -2,7 +2,10 @@
 
 namespace App\Exceptions;
 
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -26,5 +29,44 @@ class Handler extends ExceptionHandler
         $this->reportable(function (Throwable $e) {
             //
         });
+    }
+
+    public function render($request, Throwable $exception)
+    {
+        // Errores de base de datos)
+        if ($exception instanceof QueryException) {
+            return response()->json([
+                'errors' => [
+                    [
+                        'status' => '500',
+                        'title' => 'Database Error',
+                        'detail' => 'Error procesando la respuesta. Inténtelo más tarde.'
+                    ]
+                ]
+            ], 500);
+        }
+
+        if ($exception instanceof ValidationException) {//reciba por post los campos y no cumpla
+            return $this->invalidJson($request, $exception);
+        }
+        // Delegar a la implementación predeterminada para otras excepciones no manejadas
+        return parent::render($request, $exception);
+    }
+
+    protected function invalidJson($request, ValidationException $exception): JsonResponse
+    {//devolver un error por cad uno de no requisitos del formulario
+        return response()->json([
+            'errors' => collect($exception->errors())->map(function ($message, $field) use
+            ($exception) {
+                return [
+                    'status' => '422',
+                    'title'  => 'Validation Error',
+                    'details' => $message[0],
+                    'source' => [
+                        'pointer' => '/data/attributes/' . $field
+                    ]
+                ];
+            })->values()
+        ], $exception->status);
     }
 }

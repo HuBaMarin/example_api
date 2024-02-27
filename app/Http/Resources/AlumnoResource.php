@@ -21,6 +21,7 @@ class AlumnoResource extends JsonResource
             "attributes" => [
                 "id" => $this->id,
                 "nombre" => $this->nombre,
+                "direccion"=>$this->direccion,
                 "email" => $this->email
             ],
             'links' => [
